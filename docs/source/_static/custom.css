@@ -1,0 +1,5 @@
+/* Limit cell output height and make it scrollable */
+.nboutput .output_area pre {
+    max-height: 300px;
+    overflow-y: auto;
+}

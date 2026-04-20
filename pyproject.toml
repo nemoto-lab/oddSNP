@@ -1,0 +1,55 @@
+# pyproject.toml for the oddSNP project
+# See: https://peps.python.org/pep-0621/ for project table keys
+
+[build-system]
+requires = ["setuptools"]
+
+[project]
+# Basic project metadata 
+name = "oddSNP"
+version = "0.0.2"
+
+# Contact information
+authors = [
+  { name="Rodolfo Allendes", email="rodolfo.allendes.prime@osaka-u.ac.jp" },
+  { name="Takahiro Nemoto", email="nemoto.takahiro.prime@osaka-u.ac.jp" }
+]
+
+description = "A CLI tool for Optimizing demultiplexing pooled experiments based on Single-Nuclotide Polymorphism"
+readme = "README.md"
+
+# Minimum version of python supported 
+requires-python = ">=3.12"
+
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+
+# Runtime dependencies
+dependencies = [
+  "click",
+  "pandas",
+  "pysam",
+  "plotly",
+  "nbformat",
+  "kaleido",
+  "tqdm",
+  "more_itertools",
+  "joblib",
+  "requests",
+  "ipykernel",
+  "threadpoolctl",
+  "vireoSNP",
+]
+# cellsnp-lite needs to be installed with conda
+
+[project.urls]
+Homepage = "https://github.com/nemoto-lab/oddSNP"
+#Issues = "https://github.com/pypa/sampleproject/issues"
+
+# This is required for the project to be recognized as a command-line tool 
+# and provides an access point to it 
+[project.scripts]
+oddSNP = "oddSNP.__main__:oddSNP"
+

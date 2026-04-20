@@ -1,0 +1,39 @@
+```yaml
+cff-version: 1.2.0
+message: "If you find this repository useful for your research, please cite it as below:"
+authors:
+  - family-names: "Allendes Osorio"
+    given-names: "Rodolfo Sebastian"
+    orcid: "https://orcid.org/0000-0000-0000-0000"
+  - family-names: "Nemoto"
+    given-names: "Takahiro"
+  - family-names: "Nishimura"
+    given-names: "Toshiya"
+  - family-names: "Shigihara"
+    given-names: "Yuichi"
+  - family-names: "Kimura"
+    given-names: "Masaki"
+  - family-names: "Takebe"
+    given-names: "Takanori"
+title: "OddSNP"
+version: 0.0.1
+date-released: 2026-04-17
+url: "https://github.com/nemoto-lab/oddSNP"
+preferred-citation: 
+  type: article
+  title: "OddSNP: a predictive framework for optimizing multiplexed single-cell RNA-seq experiments"
+  authors:
+    - family-names: "Allendes Osorio"
+      given-names: "Rodolfo Sebastian"
+    - family-names: "Nemoto"
+      given-names: "Takahiro"
+    - family-names: "Nishimura"
+      given-names: "Toshiya"
+    - family-names: "Shigihara"
+      given-names: "Yuichi"
+    - family-names: "Kimura"
+      given-names: "Masaki"
+    - family-names: "Takebe"
+      given-names: "Takanori"
+  url: "https://doi.org/10.64898/2025.12.08.692882"
+  
