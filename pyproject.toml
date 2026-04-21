@@ -7,14 +7,17 @@ requires = ["setuptools"]
 [project]
 # Basic project metadata 
 name = "oddSNP"
-version = "0.0.2"
+version = "0.1.0"
 
 # Contact information
 authors = [
   { name="Rodolfo Allendes", email="rodolfo.allendes.prime@osaka-u.ac.jp" },
   { name="Takahiro Nemoto", email="nemoto.takahiro.prime@osaka-u.ac.jp" }
 ]
-
+maintainers = [
+  { name = "Rodolfo Allendes", email = "rodolfo.allendes.prime@osaka-u.ac.jp" },
+  { name = "Takahiro Nemoto", email = "nemoto.takahiro.prime@osaka-u.ac.jp" }
+]
 description = "A CLI tool for Optimizing demultiplexing pooled experiments based on Single-Nuclotide Polymorphism"
 readme = "README.md"
 
@@ -46,6 +49,7 @@ dependencies = [
 
 [project.urls]
 Homepage = "https://github.com/nemoto-lab/oddSNP"
+Documentation = "https://nemoto-lab.github.io/oddSNP/"
 #Issues = "https://github.com/pypa/sampleproject/issues"
 
 # This is required for the project to be recognized as a command-line tool 

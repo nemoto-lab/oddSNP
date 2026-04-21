@@ -13,7 +13,7 @@ bioconda source.
 
 .. code-block:: bash
 
-  :~$ conda create --name oddsnp
+  :~$ conda create --name oddsnp python=3.12
   :~$ conda activate oddsnp
   (oddsnp):~$ conda install -c bioconda oddsnp
 
@@ -26,7 +26,7 @@ interfering with system libraries.
 
 .. code-block:: bash
 
-  :~$ conda create --name oddsnp
+  :~$ conda create --name oddsnp python=3.12
   :~$ conda activate oddsnp
   (oddsnp):~$ conda install pip
   (oddsnp):~$ pip install oddsnp
@@ -44,12 +44,12 @@ tool in the current environment, we simply use the following:
 
 .. code-block:: bash
   
-  :~$ conda create --name oddsnp
+  :~$ conda create --name oddsnp python=3.12
   :~$ conda activate oddsnp
   (oddsnp):~$ conda install pip
   (oddsnp):~$ cd path/to/oddsnp/
   (oddsnp):~/path/to/oddsnp$ pip install .
-```
+
 
 In this case, make sure that the `pip` version used for installation is the one 
 associated to the environment and not a system version (i.e. `$ which pip` 

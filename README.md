@@ -10,8 +10,7 @@ Details on these metrics and the implementation of the tool are available in the
 
 The full documentation of *oddSNP* is available at:
 https://nemoto-lab.github.io/oddSNP/
-and at 
-https://oddsnp.readthedocs.io/
+
 
 ## Installation
 
@@ -22,7 +21,7 @@ The recommended way to install *oddSNP* is by using a virtual environments manag
 We create a new conda environment and directly install *oddSNP* from its bioconda source.
 
 ```bash
-:~$ conda create --name oddsnp
+:~$ conda create --name oddsnp python=3.12
 :~$ conda activate oddsnp
 (oddsnp):~$ conda install -c bioconda oddsnp
 ```
@@ -32,7 +31,7 @@ We create a new conda environment and directly install *oddSNP* from its biocond
 Still, we recommend to install *oddSNP* inside a virtual environment. In this case, we need to make sure to also install `pip` to the created environment to avoid interfering with system libraries.
 
 ```bash
-:~$ conda create --name oddsnp
+:~$ conda create --name oddsnp python=3.12
 :~$ conda activate oddsnp
 (oddsnp):~$ conda install pip
 (oddsnp):~$ pip install oddsnp

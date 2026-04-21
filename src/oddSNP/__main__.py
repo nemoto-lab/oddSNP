@@ -22,7 +22,7 @@ from . import snpic
 from . import cpsnpic
 
 @click.group()
-@click.version_option(version='0.0.2', prog_name='oddSNP')
+@click.version_option(version='0.1.0', prog_name='oddSNP')
 def oddSNP():
   pass
 
