@@ -4,7 +4,7 @@ data that accurately predicts the success of genotype-based demultiplexing;
 and its equivalent for genotype-free approaches, cell-paired SNP-Information 
 Content (cpSNP-IC)."""
 
-__version__ = '0.1.0'
+__version__ = '0.1.1'
 __author__ = 'Rodolfo Allendes'
 __email__ = 'rodolfo.allendes.prime@osaka-u.ac.jp'
 
