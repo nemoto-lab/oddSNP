@@ -3,3 +3,9 @@
     max-height: 300px;
     overflow-y: auto;
 }
+
+/* change the size of the log */
+.sidebar-brand img {
+    max-height: 100px;
+    width: auto;
+}
