@@ -1,13 +1,6 @@
-<table align="center">
-  <tr>
-    <td valign="middle">
-      <img src="docs/source/_static/logo.png" width="80"/>
-    </td>
-    <td valign="middle">
-      <h1 style="margin: 0;">oddSNP</h1>
-    </td>
-  </tr>
-</table>
+<p align="center">
+  <img src="docs/source/_static/banner.png" width=300px>
+</p>
 
 Donor multiplexing is a powerful strategy to increase scale, lower the costs, and reduce batch effects in single-cell RNA sequencing (scRNAseq), but clear guidelines for experimental design are lacking, forcing researchers to risk costly demultiplexing failures. To address this, we introduce SNP-Information Content (SNP-IC) and cell-paird SNP-Information Content (cpSNP-IC), quantitative metrics that can be computed from simple, unpooled pilot data and that accurately predict the success of demultiplexing. *oddSNP* is an open-source framework for computing these metrics, enabling in-silico titration of sequencing depth and donor complexity to optimize experimental design before committing to large-scale studies. 
 
