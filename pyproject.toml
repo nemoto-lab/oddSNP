@@ -33,7 +33,7 @@ classifiers = [
 dependencies = [
   "click",
   "pandas",
-  "pysam",
+  "pysam>=0.17",
   "plotly",
   "nbformat",
   "kaleido",

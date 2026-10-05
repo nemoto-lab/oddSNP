@@ -25,7 +25,6 @@ import pysam, pysam.bcftools
 from pathlib import Path
 from tqdm import tqdm
 import pandas as pd
-import numpy as np
 
 from . import utils
 
@@ -43,15 +42,22 @@ def downsample():
 @click.option('--force', is_flag=True, help='Override previous results')
 def reads_downsampling(bam, reads, oupath, celltag, seed, nproc, force):
     """ Downsample BAM file by extracting a given percentage of reads.
-    It saves both the filtered BAM file and a TSV file with the cell barcodes to 
-    the output directory. 
+    It saves both the filtered BAM file and a TSV file with the cell barcodes to
+    the output directory.
+
+    Reads are selected with `samtools view --subsample`, which decides based on
+    a seeded hash of the read name. All records of a read (primary, secondary,
+    supplementary, mates) are kept or dropped together, and for a given seed
+    smaller fractions are subsets of larger ones. The number of kept reads is
+    approximately (not exactly) READS times the total. The filtered file is
+    indexed (.bam.bai), so the input BAM must be coordinate-sorted.
 
     Arguments:
-    
+
         BAM: The input BAM file
-    
+
         READS: The fraction of reads to keep (between 0 and 1)
-        
+
         OUTDIR: The path to the directory where to store the filtered BAM file
     """
     # remove possible trailing slash
@@ -64,41 +70,25 @@ def reads_downsampling(bam, reads, oupath, celltag, seed, nproc, force):
       return tgt
 
     os.makedirs(oupath, exist_ok=True)
-    # get total number of lines in the file
-    totallines= utils.call_count_lines(bam=bam, nproc=nproc)
-    print('Total number of reads in {}: {:,}'.format(bam, totallines))
+    # subsample by read name, so all records of a read are kept or dropped together
+    pysam.samtools.view(
+      '-b',
+      '--subsample', str(reads),
+      '--subsample-seed', str(seed),
+      '--threads', str(nproc),
+      '-o', str(tgt),
+      bam,
+      catch_stdout=False
+    )
+    # always (re)build the index, so an old one is never paired with the new file
+    pysam.index('-@', str(nproc), str(tgt), '{}.bai'.format(tgt))
 
-    # generate a list of as many true/false values as needed
-    keep = round(totallines*reads)
-    arr = np.concatenate((
-      np.ones(keep, dtype=bool), 
-      np.zeros(totallines-keep, dtype=bool)
-    ))
-    # and shuffle the values to randoly determine the lines to keep
-    rng = np.random.default_rng(seed)
-    rng.shuffle(arr) 
-
-    # process the file, keeping the predetermined lines and dropping the
-    # remaining ones
-    inp = pysam.AlignmentFile('{}'.format(bam), 'rb')
-    out = pysam.AlignmentFile(
-      '{}'.format(tgt),
-      'wb', template=inp)
-        
-    # re-map all reads in the original file
+    # collect the cell barcodes present in the filtered file
     bcodes = set()
-    for i,read in tqdm(enumerate(inp.fetch(until_eof=True)), 
-      total=totallines,
-      desc='Filtering reads'):
-      if arr[i]:
-        try:
-          out.write(read) # make sure to copy the read first
-          bcodes.add(read.get_tag(tag=celltag)) # and then try to fetch the cell bcode
-        except KeyError:
-          continue
-    # close the files after finishing
-    inp.close()
-    out.close()
+    with pysam.AlignmentFile(str(tgt), 'rb', threads=nproc) as out:
+      for read in tqdm(out.fetch(until_eof=True), desc='Collecting barcodes'):
+        if read.has_tag(celltag):
+          bcodes.add(read.get_tag(celltag))
 
     #convert bcodes to DataFrame and save to file
     bcodes_df = pd.DataFrame.from_dict(data={'cells': list(bcodes)})
