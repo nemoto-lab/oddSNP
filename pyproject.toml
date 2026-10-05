@@ -7,7 +7,7 @@ requires = ["setuptools"]
 [project]
 # Basic project metadata 
 name = "oddSNP"
-version = "0.1.1"
+version = "0.1.2"
 
 # Contact information
 authors = [
