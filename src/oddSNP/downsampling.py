@@ -58,7 +58,7 @@ def reads_downsampling(bam, reads, oupath, celltag, seed, nproc, force):
 
         READS: The fraction of reads to keep (between 0 and 1)
 
-        OUTDIR: The path to the directory where to store the filtered BAM file
+        OUPATH: The path to the directory where to store the filtered BAM file
     """
     # remove possible trailing slash
     oupath = oupath.rstrip('/') if len(oupath)>1 else oupath
