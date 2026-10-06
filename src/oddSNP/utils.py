@@ -160,6 +160,11 @@ def cslite_pileup(bam, reference, barcodes, oupath, celltag, umitag, mincount, n
       print(traceback.format_exc())
       sys.exit(1)
 
+    # stop if cellsnp-lite itself failed
+    if proc.returncode != 0:
+      print(f'cellsnp-lite failed with exit code {proc.returncode}')
+      sys.exit(proc.returncode)
+
     return
 
 
@@ -196,9 +201,9 @@ def call_cslite_pileup(bam, reference, barcodes, oupath, celltag, umitag, mincou
 @click.option('--nproc', type=int, default=1, help='Number of parallel processes to use')
 def count_lines(bam, nproc):
     """ Count the number of lines in a BAM file using samtools
-    
+
     Arguments:
-        
+
         BAM: Name of the BAM file
     """
     lines = pysam.samtools.view('-c', '--threads', str(nproc), bam)
@@ -218,7 +223,7 @@ def call_count_lines(bam, nproc):
       bam=bam,
       nproc=nproc
     )
-  
+
 @utils.command()
 @click.argument('inpath', type=str)
 @click.argument('oupath', type=str)
@@ -233,11 +238,11 @@ def vireo(inpath, oupath, genotype, genotag, ndonor, nproc, force):
     Arguments:
 
         INPATH: Path to the input file containing the single-cell data to be demultiplexed.
-        
+
         OUPATH: Path to the output directory to store results.
     """
     try:
-      utils.assert_vireo()
+      assert_vireo()
     except Exception:
       print(traceback.format_exc())
       sys.exit(1)
@@ -246,7 +251,7 @@ def vireo(inpath, oupath, genotype, genotag, ndonor, nproc, force):
     # vireo -c $CELL_DATA -d $DONOR_GT_FILE -o $OUT_DIR
     if genotype and not ndonor:
       print('Running vireo demultiplexation with genotype...')
-      subprocess.run([
+      proc = subprocess.run([
         'vireo',
         '-c', inpath,
         '-d', genotype.name,
@@ -258,7 +263,7 @@ def vireo(inpath, oupath, genotype, genotag, ndonor, nproc, force):
     # vireo -c $CELL_DATA -N $n_donor -o $OUT_DIR
     elif ndonor and not genotype:
       print('Running vireo demultiplexation without genotype...')
-      subprocess.run([
+      proc = subprocess.run([
         'vireo',
         '-c', inpath,
         '-o', oupath,
@@ -270,7 +275,12 @@ def vireo(inpath, oupath, genotype, genotag, ndonor, nproc, force):
       print('Error: Invalid combination of parameters for vireo demultiplexation.')
       print('Please provide either a genotype file (--genotype) or the number of donors (--ndonor), but not both.')
       sys.exit(1)
-    
+
+    # stop if vireo itself failed
+    if proc.returncode != 0:
+      print(f'vireo failed with exit code {proc.returncode}')
+      sys.exit(proc.returncode)
+
     return
 
 def call_vireo(inpath, oupath, genotype, genotag, ndonor, nproc, force):
