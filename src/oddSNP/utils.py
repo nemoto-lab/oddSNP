@@ -256,7 +256,7 @@ def vireo(inpath, oupath, genotype, genotag, ndonor, nproc, force):
         '-c', inpath,
         '-d', genotype.name,
         '-o', oupath,
-        '--genotag', genotag,
+        '--genoTag', genotag,
         '--nproc', str(nproc)
       ])
     # without any genotype:
