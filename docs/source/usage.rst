@@ -36,7 +36,5 @@ You can also call oddSNP functions directly from Python::
     cpsnpic.call_run_all(
         inpath='path/to/pileup/',
         oupath='path/to/output/',
-        nproc=20,
-        batch_size=100000,
         force=False
     )

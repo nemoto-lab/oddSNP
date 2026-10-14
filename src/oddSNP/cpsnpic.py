@@ -36,8 +36,8 @@ def cpsnpic():
 @cpsnpic.command
 @click.argument('inpath', type=click.Path(exists=True))
 @click.argument('oupath', type=str)
-@click.option('--nproc', type=int, default=20, help='Deprecated, ignored.')
-@click.option('--batch_size', type=int, default=100000, help='Deprecated, ignored.')
+@click.option('--nproc', type=int, default=None, help='Deprecated, ignored.')
+@click.option('--batch_size', type=int, default=None, help='Deprecated, ignored.')
 @click.option('--force', is_flag=True, help='Override target file.')
 def calculate_cpsnpic(inpath, oupath, nproc, batch_size, force):
   """ Calculate the cpSNP-IC for pairs of cells. Returns the name of the file 
@@ -111,7 +111,7 @@ def calculate_cpsnpic(inpath, oupath, nproc, batch_size, force):
   df.to_pickle(tgt, compression='gzip')
   return tgt
 
-def call_calculate_cpsnpic(inpath,oupath,nproc,batch_size,force):
+def call_calculate_cpsnpic(inpath,oupath,nproc=None,batch_size=None,force=False):
     """Python API wrapper for :func:`calculate_cpsnpic`.
 
     Args:
@@ -119,8 +119,8 @@ def call_calculate_cpsnpic(inpath,oupath,nproc,batch_size,force):
             contain at least the following files: ``cellSNP.samples.tsv``,
             ``cellSNP.tag.AD/DP`` and ``OTH`` matrices
         oupath: Path to the output folder where results will be saved.
-        nproc: Number of parallel processes to use
-        batch_size: Number of cell pairs to process in each batch.
+        nproc: Deprecated, ignored.
+        batch_size: Deprecated, ignored.
         force: If ``True``, override the target file.
     """
     return calculate_cpsnpic.callback(
@@ -237,8 +237,8 @@ def call_save_cpsnpic_plot(histofile, output, force):
 @cpsnpic.command()
 @click.argument('inpath', type=str)
 @click.argument('oupath', type=str)
-@click.option('--nproc', type=int, default=20, help='Number of parallel processes to use')
-@click.option('--batch_size', type=int, default=100000, help='Number of cell pairs to process in each batch.')
+@click.option('--nproc', type=int, default=None, help='Deprecated, ignored.')
+@click.option('--batch_size', type=int, default=None, help='Deprecated, ignored.')
 @click.option('--force', is_flag=True, help='Override target files.')
 def run_all(inpath, oupath, nproc, batch_size, force):
     """ Run all cpSNP-IC calculation steps.
@@ -273,14 +273,14 @@ def run_all(inpath, oupath, nproc, batch_size, force):
       force=force
     )
 
-def call_run_all(inpath, oupath, nproc, batch_size, force):
+def call_run_all(inpath, oupath, nproc=None, batch_size=None, force=False):
     """ Python API wrapper for :func:`run_all`.
 
     Args:
         inpath: Path to the folder containing pileup related files.
         oupath: Path to the output folder where results will be saved.
-        nproc: Number of parallel processes to use.
-        batch_size: Number of cell pairs to process in each batch.
+        nproc: Deprecated, ignored.
+        batch_size: Deprecated, ignored.
         force: If ``True``, override target files.
     """
     return run_all.callback(
