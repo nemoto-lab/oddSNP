@@ -19,14 +19,12 @@
 import click
 import traceback
 import math
-import pickle, gzip
-import itertools, more_itertools
-import joblib
-import tqdm 
+import tqdm
 
 from pathlib import Path
 import pandas as pd
 import numpy as np
+import scipy.sparse as sp
 
 from . import genotype
 from . import plotting
@@ -35,37 +33,11 @@ from . import plotting
 def cpsnpic():
   pass
 
-def matchingSNPs(snps1, snps2):
-  """ Calculate the sum of min OTH+DP for matching SNPs between two cells.
-  
-  Args:
-    snps1: DataFrame with SNPs for cell 1
-    snps2: DataFrame with SNPs for cell 2
-  
-  Returns:
-    A list with [cell1_bcode, cell2_bcode, sum_min_OTH+DP]
-  """
-  tmp = pd.concat([snps1,snps2], axis=1, keys=[1,2]).dropna()
-  if tmp.shape[0]==0: #empty intersection means no matching SNPs
-    return None
-  
-  # flat the column names and calculate the min OTH+DP for each SNP in the intersection
-  tmp.columns = [ '{}_{}'.format(b,a) for (a,b) in tmp.columns.to_flat_index() ]
-  tmp['sum_1'] = tmp['DP_1']+tmp['OTH_1']
-  tmp['sum_2'] = tmp['DP_2']+tmp['OTH_2']
-  tmp['min_sum'] = tmp[['sum_1','sum_2']].min(axis=1)
-
-  return [
-    snps1.bcode.iat[0],
-    snps2.bcode.iat[0],
-    tmp.min_sum.sum() # sum of minimum across matching SNPs
-  ]
-
 @cpsnpic.command
 @click.argument('inpath', type=click.Path(exists=True))
 @click.argument('oupath', type=str)
-@click.option('--nproc', type=int, default=20, help='Number of parallel processes to use')
-@click.option('--batch_size', type=int, default=100000, help='Number of cell pairs to process in each batch.')
+@click.option('--nproc', type=int, default=20, help='Deprecated, ignored.')
+@click.option('--batch_size', type=int, default=100000, help='Deprecated, ignored.')
 @click.option('--force', is_flag=True, help='Override target file.')
 def calculate_cpsnpic(inpath, oupath, nproc, batch_size, force):
   """ Calculate the cpSNP-IC for pairs of cells. Returns the name of the file 
@@ -91,60 +63,51 @@ def calculate_cpsnpic(inpath, oupath, nproc, batch_size, force):
     oupath=oupath,
     force=force
     )
-  # remove cellid
-  ag.reset_index('Cell', drop=True, inplace=True)
-  
-  # calculate or fetch the groups of SNPs by cell barcode 
-  # as this is not a DF, we need to save/load it using pickle + gzip
-  spc = Path('{}/snps_per_cell.pkl.gz'.format(oupath))
-  if not spc.is_file() or force:
-    grps = ag.groupby('bcode')
-    if not Path(oupath).exists(): Path(oupath).mkdir(parents=True)
-    print('Saving SNPs per cell to {}'.format(spc))
-    with gzip.open(spc, 'wb') as f:
-      pickle.dump(grps, f)
-  else:
-    print('Loading SNPs per cell from {}'.format(spc))
-    with gzip.open(spc, 'rb') as f:
-      grps = pickle.load(f)
-  
-  # generate all cell pairs
-  cells = list(grps.groups.keys())
-  print('Generating cell pairs for {} cells'.format(len(cells)))
-  pairs = itertools.combinations(cells, 2)
-  npairs = (len(cells) * (len(cells) - 1)) // 2
+  # cells x SNPs matrix of read counts (DP+OTH); a SNP not covered by a cell is 0
+  ag = ag.reset_index()  # columns: SNP, Cell, AD, DP, OTH, bcode
+  counts = (ag['DP'] + ag['OTH']).astype(np.int64).values
+  ag, counts = ag.loc[counts > 0], counts[counts > 0]
+  cells = pd.Index(sorted(ag.bcode.unique()))
+  snps = pd.Index(ag.SNP.unique())
+  row = cells.get_indexer(ag.bcode)
+  col = snps.get_indexer(ag.SNP)
+  ncells = len(cells)
 
-  # Perform the acutal matching of snps and counts calculation
-  # Given that the cells share SNPs, we can obtain a series of statistics 
-  # associated to them, in particular, what is the minimum Allele frequency
-  # or the number of times (DP+DP) that the SNP was found for each cell
-  full_results = []
-  total_batches= npairs // batch_size
-  print('total pairs {}, total batches {}'.format(npairs, total_batches))
+  # For integer counts, min(x_a, x_b) is the number of thresholds t = 1, 2, ...
+  # reached by both cells. With B_t the cells x SNPs matrix holding a 1 where a
+  # cell has >= t reads, min_sum for every pair is sum_t B_t . B_t^T, and SNPs
+  # covered by only one of the cells add nothing. B_t only changes at the
+  # distinct count values, so each one is weighted by the gap to the previous.
+  # The first product holds nearly all pairs; later ones are small, so they are
+  # accumulated apart and added once, instead of rebuilding the large matrix.
+  print('Calculating cpSNP-IC for {} cells'.format(ncells))
+  minsum = sp.csr_matrix((ncells, ncells), dtype=np.int64)
+  extra = sp.csr_matrix((ncells, ncells), dtype=np.int64)
+  prev = 0
+  for i, t in enumerate(tqdm.tqdm(np.unique(counts), desc='Read thresholds')):
+    keep = counts >= t
+    Bt = sp.csr_matrix(
+      (np.ones(keep.sum(), dtype=np.int64), (row[keep], col[keep])),
+      shape=(ncells, len(snps))
+    )
+    # each pair once (cell1 < cell2), no self-pairs
+    prod = sp.triu(Bt @ Bt.T, k=1, format='csr') * int(t - prev)
+    prev = t
+    if i == 0:
+      minsum = prod
+    else:
+      extra = extra + prod
+  minsum = (minsum + extra).tocoo()
 
-  for i,batch in enumerate(tqdm.tqdm(
-    more_itertools.ichunked(pairs, batch_size), 
-    total=total_batches+1, 
-    desc="Batch progress")):
-
-      results = joblib.Parallel(
-        n_jobs=nproc
-      )(
-        tqdm.tqdm([
-          joblib.delayed(matchingSNPs)(grps.get_group(a), grps.get_group(b)
-          ) for a,b in batch
-        ],
-          total=batch_size if i!=total_batches else npairs % batch_size,
-          desc="Parallel jobs"
-        )
-      )
-      results = [r for r in results if r is not None] # filter out None results
-      full_results.extend(results)
-  
-  # Create a DataFrame from the list of results
-  df = pd.DataFrame(results, columns=['cell1','cell2','min_sum'])
+  # pairs that share at least one SNP (non-zero entries)
+  df = pd.DataFrame({
+    'cell1': cells[minsum.row],
+    'cell2': cells[minsum.col],
+    'min_sum': minsum.data,
+  })
   # save the resulting file
   print('Saving results to {}'.format(tgt))
+  Path(oupath).mkdir(parents=True, exist_ok=True)
   df.to_pickle(tgt, compression='gzip')
   return tgt
 
