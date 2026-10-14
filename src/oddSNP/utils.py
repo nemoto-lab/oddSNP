@@ -99,8 +99,8 @@ def utils():
 @click.argument('reference', type=click.Path(exists=True, dir_okay=False))#: List of reference variants
 @click.argument('barcodes', type=click.Path(exists=True, dir_okay=False))#: List of cell barcodes
 @click.argument('oupath', type=str)
-@click.option('--celltag', type=str, default='XC', help='Tag used to reference cell barcodes in the BAM.')
-@click.option('--umitag', type=str, default='XM', help='Tag used to reference UMI codes in the BAM.')
+@click.option('--celltag', type=str, default='CB', show_default=True, help='Tag used to reference cell barcodes in the BAM.')
+@click.option('--umitag', type=str, default='UB', show_default=True, help='Tag used to reference UMI codes in the BAM.')
 @click.option('--mincount', type=int, default=20)
 @click.option('--nproc', type=int, default=1, help='Number of processes to use')
 @click.option('--force', is_flag=True, help='Override previous results')

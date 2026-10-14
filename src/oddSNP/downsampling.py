@@ -36,7 +36,7 @@ def downsample():
 @click.argument('bam', type=click.Path(exists=True, dir_okay=False))
 @click.argument('reads', type=float)
 @click.argument('oupath', type=str)
-@click.option('--celltag', default='XC', help='Tag used inside the bam file for cell barcodes')
+@click.option('--celltag', default='CB', show_default=True, help='Tag used inside the bam file for cell barcodes')
 @click.option('--seed', type=int, default=1234, help='A seed to make the selection of reads deterministic')
 @click.option('--nproc', type=int, default=1, help='Number of processes to use')
 @click.option('--force', is_flag=True, help='Override previous results')
@@ -129,7 +129,7 @@ def call_reads_downsampling(bam, reads, oupath, celltag, seed, nproc, force):
 @click.argument('bam', type=click.File('rb'))
 @click.argument('barcodes', type=click.File('r'))
 @click.argument('oupath', type=str)
-@click.option('--celltag', default='XC', help='Tag used inside the bam file for cell barcodes')
+@click.option('--celltag', default='CB', show_default=True, help='Tag used inside the bam file for cell barcodes')
 @click.option('--nproc', type=int, default=1, help='Number of processes to use')
 @click.option('--force', is_flag=True, help='Override previous results')
 def barcode_downsampling(bam, barcodes, oupath, celltag, nproc, force):
