@@ -156,14 +156,15 @@ def generate_histogram(cpfile, oupath, force):
     agdf = pd.read_pickle(cpfile)
 
     # determine the maximum value to set the histogram bins
-    m = math.ceil(agdf.min_sum.max())
-    nb = 100 if m>100 else m # fix the maximum number of bins
-    step = m//nb
-    bin_edges = np.arange(start=0,stop=m+step, step=step) # make sure the bins have int-edges
+    values = agdf.min_sum.dropna().values
+    m = math.ceil(values.max()) if len(values) else 0
+    step = max(1, math.ceil(m / 100)) # int bin width, so that at most 100 bins are needed
+    nb = max(1, math.ceil(m / step)) # just enough bins to reach m
+    bin_edges = np.arange(nb + 1) * step # int edges, last edge >= m
     bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2 # midpoint of each bin
-    
+
     bin_counts, _ = np.histogram(
-      agdf.min_sum.dropna().values,
+      values,
       bins=bin_edges,
     )
     
