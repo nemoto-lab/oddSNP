@@ -41,9 +41,10 @@ jobs:
           path: docs/build/html
 
   deploy:
+    if: github.repository == 'nemoto-lab/oddSNP'
     environment:
       name: github-pages
-      url: ${{ steps.deploy.outputs.page_url }}
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     needs: build-docs
     steps:
